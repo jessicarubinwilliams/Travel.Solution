@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Travel.Models;
@@ -20,7 +21,7 @@ namespace Travel.Controllers
 
     // GET: api/Destinations
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Destination>>> Get(string city, string state, int rating, string country, string visitDate)
+    public async Task<ActionResult<IEnumerable<Destination>>> Get(string city, string state, string country, string visitDate, int rating)
     {
       var query = _db.Destinations.AsQueryable();
 
@@ -34,12 +35,6 @@ namespace Travel.Controllers
         query = query.Where(entry => entry.State == state);
       }
 
-//This does not work because ints can't be null. START HERE
-      if (rating != null)
-      {
-        query = query.Where(entry => entry.Rating == rating);
-      }
-
       if (country != null)
       {
         query = query.Where(entry => entry.Country == country);
@@ -48,6 +43,13 @@ namespace Travel.Controllers
       if (visitDate != null)
       {
         query = query.Where(entry => entry.VisitDate == visitDate);
+      }
+
+      //Ints can't be null in C#. Lines 49 & 50 both have the same problem:  We're able to use that code for the end point that actually searches for the ratings parameter but the main get endpoint now returns an empty body and we don't know why.  
+      if (rating.ToString() != null)
+      // if (!String.IsNullOrEmpty(rating.ToString()))
+      {
+        query = query.Where(entry => entry.Rating == rating);
       }
 
       return await query.ToListAsync();
