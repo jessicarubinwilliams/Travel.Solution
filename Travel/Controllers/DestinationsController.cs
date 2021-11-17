@@ -50,7 +50,10 @@ namespace Travel.Controllers
     [HttpGet("{id}")]
     public async Task<ActionResult<Destination>> GetDestination(int id)
     {
-        var destination = await _db.Destinations.FindAsync(id);
+        var destination = await _db.Destinations.FindAsync(id)
+          .Include(destination => destination.DestinationReviewJoinEntity)
+          .ThenInclude(join => join.Review)
+          .FirstOrDefault(destination => destination.DestinationId == id);
 
         if (destination == null)
         {
